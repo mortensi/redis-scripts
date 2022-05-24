@@ -16,12 +16,12 @@ case "$1" in
 		sleep 3
                 redis-cli -p 2222 shutdown
 		sleep 3
-                redis-cli -p 5000 shutdown
+                redis-cli -p 5001 shutdown
 		;;
 	status)
 		redis-cli -p 1111 ping
                 redis-cli -p 2222 ping
-                redis-cli -p 5000 ping
+                redis-cli -p 5001 ping
 		;;
 	*)
 		echo "Usage: start, stop, status"
