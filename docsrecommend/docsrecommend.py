@@ -52,7 +52,7 @@ def getRecommendations():
             category = conn.hmget(key, ['category'])
             print("Similarities for an article from category:" + category[0])
             keys_and_args = [key]
-            res = conn.eval("local vector = redis.call('hmget',KEYS[1], 'content_embedding') local searchres = redis.call('FT.SEARCH','article_idx','*=>[KNN 3 @content_embedding $B AS score]','PARAMS','2','B',vector[1], 'SORTBY', 'score', 'ASC', 'LIMIT', 0, 3,'RETURN',2,'score','category','DIALECT',2) return searchres", 1, *keys_and_args)
+            res = conn.eval("local vector = redis.call('hmget',KEYS[1], 'content_embedding') local searchres = redis.call('FT.SEARCH','article_idx','*=>[KNN 4 @content_embedding $B AS score]','PARAMS','2','B',vector[1], 'SORTBY', 'score', 'ASC', 'LIMIT', 1, 4,'RETURN',2,'score','category','DIALECT',2) return searchres", 1, *keys_and_args)
 
             # The first item is the number of returned results, we can skip it with [1:]
             for doc in res[1:]:
