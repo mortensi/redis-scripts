@@ -9,6 +9,10 @@ from redis.commands.search.query import Query
 # FT.CREATE doc_idx PREFIX 1 doc SCORE 1.0 SCHEMA content AS content TEXT WEIGHT 1.0
 # FT.SEARCH doc_idx * WITHSCORES LIMIT 0 10
 
+# To perform searches in a sharded Redis, aka Redis OSS Cluster, you need a modified version of 
+# Redis Stack, having RediSearch built with the OSS RediSearch Coordinator
+# https://redis.io/docs/latest/develop/interact/search-and-query/deprecated/development/
+
 
 startup_nodes = [ClusterNode('127.0.0.1', 30001),
                 ClusterNode('127.0.0.1', 30002),
