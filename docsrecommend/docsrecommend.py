@@ -1,17 +1,20 @@
 import redis
 from redis.commands.search.field import VectorField
 from redis.commands.search.query import Query
+
 from sentence_transformers import SentenceTransformer
 import uuid
 import json
 import numpy
 
-#python3 -m pip install --upgrade pip
-#pip install redis
-#pip install sentence_transformers
+# Run the example
+# python3 -m pip install --upgrade pip
+# pip install redis
+# pip install sentence_transformers
+# python3 docsrecommend.py
 
 print("Get a connection to Redis")
-pool = redis.ConnectionPool(host='127.0.0.1', port=6379, password='', encoding='utf-8', decode_responses=True)
+pool = redis.ConnectionPool(host='127.0.0.1', port=6379, password='', encoding='utf-8', decode_responses=False)
 conn = redis.Redis(connection_pool=pool)
 
 print("Instantiate the SentenceTransformer object")
@@ -41,8 +44,8 @@ def createIndex():
     except:
         print("Index already exists") 
 
-def getRecommendations():
-    print("getRecommendations")
+def getRecommendationsByCategory():
+    print("getRecommendationsByCategory")
     # Let's iterate article by article in the database, and get 3 recommendations for every article
     cursor=0
     while True:
@@ -61,6 +64,24 @@ def getRecommendations():
 
         if (cursor==0):
             break
+
+def getRecommendationsByText():
+    print("getRecommendationsByText")
+
+    embedding = model.encode("All articles about football").astype(numpy.float32).tobytes()
+    q = Query("(*)=>[KNN 3 @content_embedding $B AS score]")\
+        .return_field("content_embedding")\
+        .return_field("title")\
+        .sort_by("score", asc=True)\
+        .dialect(2)
+    res = conn.ft("article_idx").search(q, query_params={"B": embedding})
+    it = iter(res.docs[0:])
+    for x in it:
+        print(f"---> id: {x['id']}")
+        print(f"{type(x['content_embedding'])}")
+        print(type(conn.hget(x['id'], "content_embedding")))
+    
+
 
 def cleanUp():
     print("cleanUp")
@@ -81,5 +102,5 @@ def cleanUp():
 
 importData()
 createIndex()
-getRecommendations()
+getRecommendationsByText()
 cleanUp()
